@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whiskas — Productos</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    /* Fondo magenta (ajusta los hex con los exactos del Figma) */
+    --bg-glow:#c12fae;   /* el brillo central detrás del gato */
+    --bg-mid:#8f1684;
+    --bg-edge:#590a51;
+
+    /* Colores de sabor (de su diseño) */
+    --carne:#e22a1a;
+    --atun:#1f8fd6;
+    --pollo:#f5b301;
+    /* extras placeholder */
+    --salmon:#ef7e5e;
+    --pavo:#b25fae;
+
+    /* Sobre */
+    --pouch-top:#8a26a0;
+    --pouch-bot:#5f1469;
+
+    --white:#ffffff;
+    --ink:#3a0f3f;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:'Nunito', system-ui, sans-serif;
+    background:var(--bg-edge);
+    color:#fff;
+    overflow-x:hidden;
+  }
+
+  /* ============================================================
+     HERO
+  ============================================================ */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    width:100%;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    background:radial-gradient(ellipse 85% 75% at 50% 44%,
+                var(--bg-glow) 0%, var(--bg-mid) 44%, var(--bg-edge) 100%);
+  }
+
+  /* huellitas de fondo */
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130' viewBox='0 0 130 130'%3E%3Cg fill='%23ffffff'%3E%3Cellipse cx='65' cy='78' rx='20' ry='16'/%3E%3Ccircle cx='42' cy='52' r='8'/%3E%3Ccircle cx='58' cy='44' r='8'/%3E%3Ccircle cx='74' cy='44' r='8'/%3E%3Ccircle cx='90' cy='52' r='8'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:150px 150px;
+    opacity:.05;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ============================================================
+     NAV
+  ============================================================ */
+  nav{
+    position:relative;
+    z-index:30;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:26px 48px;
+  }
+  .logo{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:34px;
+    color:#fff;
+    letter-spacing:-.5px;
+    text-shadow:0 0 22px rgba(255,255,255,.55);
+    user-select:none;
+  }
+  .nav-links{
+    display:flex;
+    gap:34px;
+    list-style:none;
+  }
+  .nav-links a{
+    color:#fff;
+    text-decoration:none;
+    font-weight:700;
+    font-size:17px;
+    opacity:.92;
+    transition:opacity .2s, transform .2s;
+  }
+  .nav-links a:hover{ opacity:1; transform:translateY(-2px); }
+
+  /* ============================================================
+     ESCENARIO DEL ORBITAL
+     .stage = zona de drag (giro). touch-action: pan-y deja
+     scrollear vertical en el cel mientras el drag horizontal gira.
+  ============================================================ */
+  .stage{
+    position:relative;
+    flex:1;
+    width:100%;
+    z-index:10;
+    touch-action:pan-y;
+    cursor:grab;
+    user-select:none;
+  }
+  .stage.dragging{ cursor:grabbing; }
+
+  /* punto-centro de la órbita: todo lo de adentro se posiciona
+     respecto a este punto (left/top + translate). */
+  .orbit-system{
+    position:absolute;
+    left:50%;
+    top:48%;
+    width:0; height:0;
+  }
+
+  /* halo / spotlight detrás del gato */
+  .glow{
+    position:absolute;
+    left:0; top:0;
+    width:680px; height:680px;
+    transform:translate(-50%,-46%);
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,180,235,.45) 0%, rgba(193,47,174,0) 62%);
+    z-index:1;
+    pointer-events:none;
+  }
+
+  /* anillo de luz (eco del de ella). Va detrás del gato. */
+  .orbit-ring{
+    position:absolute;
+    left:0; top:0;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 0 28px 2px rgba(255,170,235,.25), inset 0 0 28px rgba(255,170,235,.15);
+    transform:translate(-50%,-50%);
+    z-index:2;
+    pointer-events:none;
+  }
+
+  /* gato (placeholder SVG). z-index 50 => los sobres con z<50 quedan
+     DETRÁS y los z>50 por DELANTE. */
+  .cat{
+    position:absolute;
+    left:0; top:0;
+    width:clamp(280px, 40vw, 460px);
+    transform:translate(-50%,-44%);
+    z-index:50;
+    pointer-events:none;
+    filter:drop-shadow(0 18px 40px rgba(40,5,45,.45));
+  }
+  .cat svg{ width:100%; height:auto; display:block; }
+
+  /* pupilas: oscilan de lado a lado (maneki-neko) */
+  .pupil{
+    transform-box:fill-box;
+    transform-origin:center;
+    animation:lookLR 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
+  }
+  @keyframes lookLR{
+    0%,100%{ transform:translateX(-7px); }
+    50%    { transform:translateX(7px); }
+  }
+  /* parpadeo sutil */
+  .eyelid{ transform-box:fill-box; transform-origin:center; animation:blink 5.5s infinite; }
+  @keyframes blink{
+    0%,94%,100%{ transform:scaleY(0); }
+    97%        { transform:scaleY(1); }
+  }
+
+  /* ============================================================
+     SOBRES (placeholders en CSS)
+  ============================================================ */
+  .pouch{
+    position:absolute;
+    left:0; top:0;
+    width:152px; height:190px;
+    will-change:transform;
+    transform-origin:center;
+    text-decoration:none;
+    border-radius:14px 14px 16px 16px;
+    background:linear-gradient(160deg, var(--pouch-top) 0%, var(--pouch-bot) 100%);
+    box-shadow:0 14px 30px rgba(30,4,35,.5);
+    padding:14px 12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* brillo del empaque */
+  .pouch::before{
+    content:"";
+    position:absolute; top:0; left:-30%;
+    width:55%; height:100%;
+    background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.14), rgba(255,255,255,0));
+    transform:skewX(-18deg);
+    pointer-events:none;
+  }
+  /* crimp superior */
+  .pouch::after{
+    content:"";
+    position:absolute; top:6px; left:8px; right:8px; height:7px;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,.22) 0 4px, rgba(255,255,255,0) 4px 8px);
+    border-radius:3px;
+  }
+  .pouch .brand{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size:21px;
+    color:#fff;
+    margin-top:12px;
+    letter-spacing:-.5px;
+  }
+  .pouch .age{
+    position:absolute; left:12px; top:54px;
+    background:#fff; color:var(--ink);
+    font-size:11px; font-weight:800;
+    padding:2px 6px; border-radius:5px;
+  }
+  .pouch .tab{
+    margin-top:auto;
+    width:100%;
+    border-radius:8px;
+    padding:8px 8px;
+    color:#fff;
+    text-align:left;
+    line-height:1.05;
+  }
+  .pouch .tab small{ font-size:10px; font-weight:600; opacity:.95; display:block; }
+  .pouch .tab b{ font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; }
+  .pouch .grams{
+    position:absolute; right:12px; bottom:12px;
+    color:#fff; font-weight:800; font-size:14px;
+    text-shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  /* estado activo (mouse encima): se levanta y brilla */
+  .pouch.active{
+    box-shadow:0 0 0 3px rgba(255,255,255,.75), 0 22px 46px rgba(20,2,25,.6);
+  }
+  .pouch .cta{
+    position:absolute;
+    inset:auto 0 -34px 0;
+    text-align:center;
+    color:#fff; font-weight:800; font-size:12px;
+    opacity:0; transition:opacity .2s, transform .2s;
+    transform:translateY(-6px);
+  }
+  .pouch.active .cta{ opacity:1; transform:translateY(0); }
+
+  /* croquetas flotando */
+  .kibble{
+    position:absolute;
+    width:16px; height:14px;
+    background:#c98a4a;
+    border-radius:40% 40% 45% 45%;
+    box-shadow:inset 0 -3px 4px rgba(0,0,0,.2);
+    opacity:.9;
+    z-index:5;
+    pointer-events:none;
+    animation:floatK linear infinite;
+  }
+  @keyframes floatK{
+    0%  { transform:translateY(0) rotate(0deg); }
+    50% { transform:translateY(-26px) rotate(180deg); }
+    100%{ transform:translateY(0) rotate(360deg); }
+  }
+
+  /* gatito que se asoma (eco del de ella) */
+  .peeker{
+    position:absolute;
+    right:0; bottom:0;
+    width:clamp(140px, 16vw, 230px);
+    z-index:20;
+    pointer-events:none;
+    filter:drop-shadow(-6px 0 16px rgba(30,4,35,.35));
+  }
+
+  /* hint de interacción */
+  .hint{
+    position:absolute;
+    left:50%; bottom:22px;
+    transform:translateX(-50%);
+    z-index:25;
+    color:rgba(255,255,255,.8);
+    font-size:13px; font-weight:700;
+    letter-spacing:.3px;
+    pointer-events:none;
+    animation:hintPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes hintPulse{ 0%,100%{opacity:.5} 50%{opacity:.95} }
+
+  /* toast de demo al dar clic (en producción lo cambias por navegación real) */
+  .toast{
+    position:fixed;
+    left:50%; bottom:36px;
+    transform:translateX(-50%) translateY(20px);
+    background:#fff; color:var(--ink);
+    padding:12px 20px; border-radius:999px;
+    font-weight:800; font-size:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+    opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s;
+    z-index:100;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* responsive */
+  @media (max-width:680px){
+    nav{ padding:18px 20px; }
+    .nav-links{ display:none; }       /* placeholder: acá iría el menú hamburguesa */
+    .logo{ font-size:28px; }
+    .pouch{ width:118px; height:148px; }
+    .pouch .brand{ font-size:16px; }
+    .pouch .tab b{ font-size:14px; }
+    .glow{ width:440px; height:440px; }
+  }
+
+
+  /* ============================================================
+     PÁGINAS INTERNAS
+     Mantiene la estética del hero y solo agrega estructura interna.
+  ============================================================ */
+  .page{
+    position:relative;
+    min-height:100svh;
+    width:100%;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    background:radial-gradient(ellipse 85% 75% at 50% 32%,
+                var(--bg-glow) 0%, var(--bg-mid) 44%, var(--bg-edge) 100%);
+  }
+  .page::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130' viewBox='0 0 130 130'%3E%3Cg fill='%23ffffff'%3E%3Cellipse cx='65' cy='78' rx='20' ry='16'/%3E%3Ccircle cx='42' cy='52' r='8'/%3E%3Ccircle cx='58' cy='44' r='8'/%3E%3Ccircle cx='74' cy='44' r='8'/%3E%3Ccircle cx='90' cy='52' r='8'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:150px 150px;
+    opacity:.05;
+    pointer-events:none;
+    z-index:0;
+  }
+  .page-main{
+    position:relative;
+    z-index:5;
+    width:min(1120px, calc(100% - 48px));
+    margin:48px auto 80px;
+  }
+  .page-kicker{
+    display:inline-block;
+    margin-bottom:14px;
+    padding:7px 13px;
+    border-radius:999px;
+    background:rgba(255,255,255,.14);
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+  .page-title{
+    font-family:'Fredoka', sans-serif;
+    font-size:clamp(42px, 7vw, 86px);
+    line-height:.92;
+    letter-spacing:-2px;
+    max-width:760px;
+    text-shadow:0 0 26px rgba(255,255,255,.35);
+  }
+  .page-intro{
+    margin-top:18px;
+    max-width:650px;
+    font-size:clamp(17px, 2vw, 22px);
+    line-height:1.4;
+    font-weight:700;
+    color:rgba(255,255,255,.86);
+  }
+  .page-grid{
+    margin-top:44px;
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:18px;
+  }
+  .page-card{
+    min-height:170px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.13);
+    border-radius:24px;
+    padding:22px;
+    box-shadow:0 18px 40px rgba(30,4,35,.24);
+    backdrop-filter:blur(10px);
+  }
+  .page-card h2{
+    font-family:'Fredoka', sans-serif;
+    font-size:25px;
+    line-height:1;
+    margin-bottom:10px;
+  }
+  .page-card p{
+    color:rgba(255,255,255,.84);
+    font-size:15px;
+    line-height:1.45;
+    font-weight:700;
+  }
+  .page-note{
+    margin-top:32px;
+    border-radius:26px;
+    background:#fff;
+    color:var(--ink);
+    padding:22px 26px;
+    font-weight:800;
+    line-height:1.45;
+    box-shadow:0 18px 42px rgba(30,4,35,.32);
+  }
+  .active-link{
+    opacity:1!important;
+    text-shadow:0 0 18px rgba(255,255,255,.7);
+  }
+  .faq-list{
+    margin-top:40px;
+    display:grid;
+    gap:16px;
+  }
+  details{
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.13);
+    border-radius:22px;
+    padding:19px 22px;
+    box-shadow:0 18px 40px rgba(30,4,35,.18);
+  }
+  summary{
+    cursor:pointer;
+    font-family:'Fredoka', sans-serif;
+    font-size:22px;
+    font-weight:700;
+  }
+  details p{
+    margin-top:12px;
+    color:rgba(255,255,255,.84);
+    line-height:1.45;
+    font-weight:700;
+  }
+  @media (max-width:900px){
+    .page-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  }
+  @media (max-width:680px){
+    .page-main{ width:min(100% - 36px, 1120px); margin-top:36px; }
+    .page-grid{ grid-template-columns:1fr; }
+  }
+
+</style>
+</head>
+<body>
+  <section class="page">
+    <nav>
+      <div class="logo">whiskas</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="productos.html" class="active-link">Productos</a></li>
+        <li><a href="bienestar.html">Bienestar</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="preguntas.html">Preguntas</a></li>
+      </ul>
+    </nav>
+
+    <main class="page-main">
+      <span class="page-kicker">catálogo whiskas</span>
+      <h1 class="page-title">Productos</h1>
+      <p class="page-intro">Una página para organizar las variedades de alimento y después sumar las cards definitivas del proyecto.</p>
+      <div class="page-grid">
+        <article class="page-card">
+          <h2>Carne</h2>
+          <p>Espacio para presentar el producto sabor carne.</p>
+        </article>
+        <article class="page-card">
+          <h2>Atún</h2>
+          <p>Espacio para presentar el producto sabor atún.</p>
+        </article>
+        <article class="page-card">
+          <h2>Pollo</h2>
+          <p>Espacio para presentar el producto sabor pollo.</p>
+        </article>
+        <article class="page-card">
+          <h2>Salmón</h2>
+          <p>Espacio para presentar el producto sabor salmón.</p>
+        </article>
+      </div>
+      
+      <div class="page-note">Después podemos reemplazar estos bloques por cards con imagen, precio, descripción y botón.</div>
+    </main>
+  </section>
+</body>
+</html>
