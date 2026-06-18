@@ -3,349 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Whiskas — Hero orbital</title>
+<!-- Versión single-file: imágenes embebidas para que no se rompan en la vista previa. -->
+<title>Whiskas — Inicio</title>
 
-<!-- ============================================================
-     TIPOGRAFÍAS (placeholder)
-     Display redondeada (Fredoka) + cuerpo (Nunito) para imitar el
-     look de Whiskas. Cuando tengas los nombres reales del Figma de
-     ella, los cambiamos acá.
-============================================================ -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
 
-<style>
-  :root{
-    /* Fondo magenta (ajusta los hex con los exactos del Figma) */
-    --bg-glow:#c12fae;   /* el brillo central detrás del gato */
-    --bg-mid:#8f1684;
-    --bg-edge:#590a51;
-
-    /* Colores de sabor (de su diseño) */
-    --carne:#e22a1a;
-    --atun:#1f8fd6;
-    --pollo:#f5b301;
-    /* extras placeholder */
-    --salmon:#ef7e5e;
-    --pavo:#b25fae;
-
-    /* Sobre */
-    --pouch-top:#8a26a0;
-    --pouch-bot:#5f1469;
-
-    --white:#ffffff;
-    --ink:#3a0f3f;
-  }
-
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ height:100%; }
-  body{
-    font-family:'Nunito', system-ui, sans-serif;
-    background:var(--bg-edge);
-    color:#fff;
-    overflow-x:hidden;
-  }
-
-  /* ============================================================
-     HERO
-  ============================================================ */
-  .hero{
-    position:relative;
-    min-height:100svh;
-    width:100%;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    background:radial-gradient(ellipse 85% 75% at 50% 44%,
-                var(--bg-glow) 0%, var(--bg-mid) 44%, var(--bg-edge) 100%);
-  }
-
-  /* huellitas de fondo */
-  .hero::before{
-    content:"";
-    position:absolute; inset:0;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130' viewBox='0 0 130 130'%3E%3Cg fill='%23ffffff'%3E%3Cellipse cx='65' cy='78' rx='20' ry='16'/%3E%3Ccircle cx='42' cy='52' r='8'/%3E%3Ccircle cx='58' cy='44' r='8'/%3E%3Ccircle cx='74' cy='44' r='8'/%3E%3Ccircle cx='90' cy='52' r='8'/%3E%3C/g%3E%3C/svg%3E");
-    background-size:150px 150px;
-    opacity:.05;
-    pointer-events:none;
-    z-index:0;
-  }
-
-  /* ============================================================
-     NAV
-  ============================================================ */
-  nav{
-    position:relative;
-    z-index:30;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:26px 48px;
-  }
-  .logo{
-    font-family:'Fredoka', sans-serif;
-    font-weight:700;
-    font-size:34px;
-    color:#fff;
-    letter-spacing:-.5px;
-    text-shadow:0 0 22px rgba(255,255,255,.55);
-    user-select:none;
-  }
-  .nav-links{
-    display:flex;
-    gap:34px;
-    list-style:none;
-  }
-  .nav-links a{
-    color:#fff;
-    text-decoration:none;
-    font-weight:700;
-    font-size:17px;
-    opacity:.92;
-    transition:opacity .2s, transform .2s;
-  }
-  .nav-links a:hover{ opacity:1; transform:translateY(-2px); }
-
-  /* ============================================================
-     ESCENARIO DEL ORBITAL
-     .stage = zona de drag (giro). touch-action: pan-y deja
-     scrollear vertical en el cel mientras el drag horizontal gira.
-  ============================================================ */
-  .stage{
-    position:relative;
-    flex:1;
-    width:100%;
-    z-index:10;
-    touch-action:pan-y;
-    cursor:grab;
-    user-select:none;
-  }
-  .stage.dragging{ cursor:grabbing; }
-
-  /* punto-centro de la órbita: todo lo de adentro se posiciona
-     respecto a este punto (left/top + translate). */
-  .orbit-system{
-    position:absolute;
-    left:50%;
-    top:48%;
-    width:0; height:0;
-  }
-
-  /* halo / spotlight detrás del gato */
-  .glow{
-    position:absolute;
-    left:0; top:0;
-    width:680px; height:680px;
-    transform:translate(-50%,-46%);
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(255,180,235,.45) 0%, rgba(193,47,174,0) 62%);
-    z-index:1;
-    pointer-events:none;
-  }
-
-  /* anillo de luz (eco del de ella). Va detrás del gato. */
-  .orbit-ring{
-    position:absolute;
-    left:0; top:0;
-    border-radius:50%;
-    border:1px solid rgba(255,255,255,.18);
-    box-shadow:0 0 28px 2px rgba(255,170,235,.25), inset 0 0 28px rgba(255,170,235,.15);
-    transform:translate(-50%,-50%);
-    z-index:2;
-    pointer-events:none;
-  }
-
-  /* gato (placeholder SVG). z-index 50 => los sobres con z<50 quedan
-     DETRÁS y los z>50 por DELANTE. */
-  .cat{
-    position:absolute;
-    left:0; top:0;
-    width:clamp(280px, 40vw, 460px);
-    transform:translate(-50%,-44%);
-    z-index:50;
-    pointer-events:none;
-    filter:drop-shadow(0 18px 40px rgba(40,5,45,.45));
-  }
-  .cat svg{ width:100%; height:auto; display:block; }
-
-  /* pupilas: oscilan de lado a lado (maneki-neko) */
-  .pupil{
-    transform-box:fill-box;
-    transform-origin:center;
-    animation:lookLR 2.8s cubic-bezier(.45,.05,.55,.95) infinite;
-  }
-  @keyframes lookLR{
-    0%,100%{ transform:translateX(-7px); }
-    50%    { transform:translateX(7px); }
-  }
-  /* parpadeo sutil */
-  .eyelid{ transform-box:fill-box; transform-origin:center; animation:blink 5.5s infinite; }
-  @keyframes blink{
-    0%,94%,100%{ transform:scaleY(0); }
-    97%        { transform:scaleY(1); }
-  }
-
-  /* ============================================================
-     SOBRES (placeholders en CSS)
-  ============================================================ */
-  .pouch{
-    position:absolute;
-    left:0; top:0;
-    width:152px; height:190px;
-    will-change:transform;
-    transform-origin:center;
-    text-decoration:none;
-    border-radius:14px 14px 16px 16px;
-    background:linear-gradient(160deg, var(--pouch-top) 0%, var(--pouch-bot) 100%);
-    box-shadow:0 14px 30px rgba(30,4,35,.5);
-    padding:14px 12px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    overflow:hidden;
-    -webkit-tap-highlight-color:transparent;
-  }
-  /* brillo del empaque */
-  .pouch::before{
-    content:"";
-    position:absolute; top:0; left:-30%;
-    width:55%; height:100%;
-    background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.14), rgba(255,255,255,0));
-    transform:skewX(-18deg);
-    pointer-events:none;
-  }
-  /* crimp superior */
-  .pouch::after{
-    content:"";
-    position:absolute; top:6px; left:8px; right:8px; height:7px;
-    background:repeating-linear-gradient(90deg, rgba(255,255,255,.22) 0 4px, rgba(255,255,255,0) 4px 8px);
-    border-radius:3px;
-  }
-  .pouch .brand{
-    font-family:'Fredoka', sans-serif;
-    font-weight:700;
-    font-size:21px;
-    color:#fff;
-    margin-top:12px;
-    letter-spacing:-.5px;
-  }
-  .pouch .age{
-    position:absolute; left:12px; top:54px;
-    background:#fff; color:var(--ink);
-    font-size:11px; font-weight:800;
-    padding:2px 6px; border-radius:5px;
-  }
-  .pouch .tab{
-    margin-top:auto;
-    width:100%;
-    border-radius:8px;
-    padding:8px 8px;
-    color:#fff;
-    text-align:left;
-    line-height:1.05;
-  }
-  .pouch .tab small{ font-size:10px; font-weight:600; opacity:.95; display:block; }
-  .pouch .tab b{ font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; }
-  .pouch .grams{
-    position:absolute; right:12px; bottom:12px;
-    color:#fff; font-weight:800; font-size:14px;
-    text-shadow:0 1px 3px rgba(0,0,0,.4);
-  }
-  /* estado activo (mouse encima): se levanta y brilla */
-  .pouch.active{
-    box-shadow:0 0 0 3px rgba(255,255,255,.75), 0 22px 46px rgba(20,2,25,.6);
-  }
-  .pouch .cta{
-    position:absolute;
-    inset:auto 0 -34px 0;
-    text-align:center;
-    color:#fff; font-weight:800; font-size:12px;
-    opacity:0; transition:opacity .2s, transform .2s;
-    transform:translateY(-6px);
-  }
-  .pouch.active .cta{ opacity:1; transform:translateY(0); }
-
-  /* croquetas flotando */
-  .kibble{
-    position:absolute;
-    width:16px; height:14px;
-    background:#c98a4a;
-    border-radius:40% 40% 45% 45%;
-    box-shadow:inset 0 -3px 4px rgba(0,0,0,.2);
-    opacity:.9;
-    z-index:5;
-    pointer-events:none;
-    animation:floatK linear infinite;
-  }
-  @keyframes floatK{
-    0%  { transform:translateY(0) rotate(0deg); }
-    50% { transform:translateY(-26px) rotate(180deg); }
-    100%{ transform:translateY(0) rotate(360deg); }
-  }
-
-  /* gatito que se asoma (eco del de ella) */
-  .peeker{
-    position:absolute;
-    right:0; bottom:0;
-    width:clamp(140px, 16vw, 230px);
-    z-index:20;
-    pointer-events:none;
-    filter:drop-shadow(-6px 0 16px rgba(30,4,35,.35));
-  }
-
-  /* hint de interacción */
-  .hint{
-    position:absolute;
-    left:50%; bottom:22px;
-    transform:translateX(-50%);
-    z-index:25;
-    color:rgba(255,255,255,.8);
-    font-size:13px; font-weight:700;
-    letter-spacing:.3px;
-    pointer-events:none;
-    animation:hintPulse 2.6s ease-in-out infinite;
-  }
-  @keyframes hintPulse{ 0%,100%{opacity:.5} 50%{opacity:.95} }
-
-  /* toast de demo al dar clic (en producción lo cambias por navegación real) */
-  .toast{
-    position:fixed;
-    left:50%; bottom:36px;
-    transform:translateX(-50%) translateY(20px);
-    background:#fff; color:var(--ink);
-    padding:12px 20px; border-radius:999px;
-    font-weight:800; font-size:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.3);
-    opacity:0; pointer-events:none;
-    transition:opacity .25s, transform .25s;
-    z-index:100;
-  }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* responsive */
-  @media (max-width:680px){
-    nav{ padding:18px 20px; }
-    .nav-links{ display:none; }       /* placeholder: acá iría el menú hamburguesa */
-    .logo{ font-size:28px; }
-    .pouch{ width:118px; height:148px; }
-    .pouch .brand{ font-size:16px; }
-    .pouch .tab b{ font-size:14px; }
-    .glow{ width:440px; height:440px; }
-  }
-</style>
+<link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-
-  <section class="hero">
+<div id="homePage" class="single-view active-view">
+  <section class="hero" id="inicio">
     <nav>
-      <div class="logo">whiskas</div>
+      <a class="logo" href="index.html" aria-label="Ir a la página de inicio"><img src="assets/images/img_018_23b6d02a2f97.png" alt="Whiskas" /></a>
       <ul class="nav-links">
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="productos.html">Productos</a></li>
-        <li><a href="bienestar.html">Bienestar</a></li>
-        <li><a href="nosotros.html">Nosotros</a></li>
-        <li><a href="preguntas.html">Preguntas</a></li>
+        <li><a href="productos.html" data-spa-route="products">Productos</a></li>
+        <li><a href="bienestar.html" data-spa-route="bienestar">Bienestar</a></li>
+        <li><a href="nosotros.html" data-spa-route="nosotros">Nosotros</a></li>
+        <li><a href="preguntas.html" data-spa-route="preguntas">Preguntas</a></li>
       </ul>
     </nav>
 
@@ -353,250 +30,95 @@
       <div class="orbit-system" id="orbitSystem">
         <div class="glow"></div>
         <div class="orbit-ring" id="orbitRing"></div>
+        <div class="orbit-ring-secondary"></div>
 
-        <!-- ====================================================
-             GATO PLACEHOLDER (SVG)
-             >>> SWAP: reemplaza este <svg> por <img src="gato.png">
-             del gato real (recortado, fondo transparente).
-             OJO CON LOS OJOS: para que se muevan, las pupilas tienen
-             que ser una CAPA SEPARADA. Dos formas:
-               a) Genera el gato con los ojos "neutros / en blanco" y
-                  pones dos divs .pupil encima de cada ojo (animados).
-               b) Recortas solo las pupilas en PNG transparente y las
-                  superpones sobre los ojos del gato.
-             En este placeholder las pupilas ya están como capa aparte
-             dentro del SVG para que veas el efecto.
-        ==================================================== -->
         <div class="cat">
-          <svg viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg">
-            <!-- cuerpo -->
-            <path d="M70 320 C60 230 80 190 150 190 C220 190 240 230 230 320 Z" fill="#f0a04b"/>
-            <path d="M70 320 C60 230 80 190 150 190 C220 190 240 230 230 320 Z" fill="url(#fur)"/>
-            <!-- orejas -->
-            <path d="M70 70 L62 12 L120 52 Z" fill="#f0a04b"/>
-            <path d="M230 70 L238 12 L180 52 Z" fill="#f0a04b"/>
-            <path d="M78 62 L74 30 L106 52 Z" fill="#f6c9a8"/>
-            <path d="M222 62 L226 30 L194 52 Z" fill="#f6c9a8"/>
-            <!-- cabeza -->
-            <ellipse cx="150" cy="120" rx="92" ry="80" fill="#f4ac57"/>
-            <!-- rayas tabby -->
-            <path d="M150 44 L150 70 M132 48 L128 72 M168 48 L172 72" stroke="#d9863a" stroke-width="6" stroke-linecap="round" fill="none"/>
-            <path d="M70 110 L40 100 M72 128 L42 126 M74 146 L46 152" stroke="#d9863a" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <path d="M230 110 L260 100 M228 128 L258 126 M226 146 L254 152" stroke="#d9863a" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <!-- ojos (blanco) -->
-            <ellipse cx="116" cy="116" rx="24" ry="26" fill="#fff"/>
-            <ellipse cx="184" cy="116" rx="24" ry="26" fill="#fff"/>
-            <!-- iris -->
-            <circle cx="116" cy="118" r="16" fill="#e0a52a"/>
-            <circle cx="184" cy="118" r="16" fill="#e0a52a"/>
-            <!-- pupilas (CAPA SEPARADA, animadas) -->
-            <g class="pupil">
-              <ellipse cx="116" cy="118" rx="7" ry="13" fill="#241308"/>
-              <circle cx="111" cy="112" r="3" fill="#fff"/>
-            </g>
-            <g class="pupil">
-              <ellipse cx="184" cy="118" rx="7" ry="13" fill="#241308"/>
-              <circle cx="179" cy="112" r="3" fill="#fff"/>
-            </g>
-            <!-- párpados para parpadeo -->
-            <rect class="eyelid" x="92" y="90" width="48" height="52" rx="22" fill="#f4ac57"/>
-            <rect class="eyelid" x="160" y="90" width="48" height="52" rx="22" fill="#f4ac57"/>
-            <!-- nariz y boca -->
-            <path d="M142 150 L158 150 L150 160 Z" fill="#e8748a"/>
-            <path d="M150 160 L150 170 M150 170 C140 178 128 174 126 166 M150 170 C160 178 172 174 174 166" stroke="#8a5a30" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <!-- lengüita feliz -->
-            <ellipse cx="150" cy="178" rx="9" ry="11" fill="#f08ba0"/>
-            <!-- bigotes -->
-            <path d="M104 150 L52 138 M106 158 L56 158 M104 166 L54 178" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round"/>
-            <path d="M196 150 L248 138 M194 158 L244 158 M196 166 L246 178" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round"/>
-            <defs>
-              <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#f4ac57"/>
-                <stop offset="1" stop-color="#e08e3c"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <img src="assets/images/img_019_fb6a75d618ec.png" alt="Gato naranja Whiskas" />
         </div>
-
-        <!-- los sobres se inyectan acá por JS -->
       </div>
 
       <div class="hint">Pasa el cursor para detener · arrastra para girar</div>
     </div>
-
-    <!-- ====================================================
-         GATITO QUE SE ASOMA (placeholder)
-         >>> SWAP: reemplaza por el PNG del gato gris de ella.
-    ==================================================== -->
-    <svg class="peeker" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
-      <path d="M60 220 C40 150 50 110 110 110 C170 110 180 150 170 220 Z" fill="#9a9389"/>
-      <path d="M40 40 L34 0 L84 30 Z" fill="#9a9389"/>
-      <path d="M150 40 L156 0 L106 30 Z" fill="#9a9389"/>
-      <ellipse cx="100" cy="78" rx="74" ry="64" fill="#aaa399"/>
-      <ellipse cx="74" cy="74" rx="15" ry="18" fill="#fff"/>
-      <ellipse cx="126" cy="74" rx="15" ry="18" fill="#fff"/>
-      <circle cx="74" cy="76" r="9" fill="#c79a2a"/>
-      <circle cx="126" cy="76" r="9" fill="#c79a2a"/>
-      <ellipse cx="74" cy="76" rx="4" ry="8" fill="#1b1208"/>
-      <ellipse cx="126" cy="76" rx="4" ry="8" fill="#1b1208"/>
-      <path d="M92 98 L108 98 L100 106 Z" fill="#e8748a"/>
-      <path d="M60 60 Q70 50 80 58 M140 60 Q130 50 120 58" stroke="#6f6a60" stroke-width="3" fill="none"/>
-    </svg>
   </section>
 
-  <div class="toast" id="toast"></div>
 
-<script>
-  /* ============================================================
-     PRODUCTOS
-     >>> SWAP: edita este array con los productos reales.
-     Los 3 primeros son los de su diseño; Salmón/Pavo son placeholders
-     para llenar la órbita (bórralos o cámbialos).
-     `href` = página real del producto (por ahora demo).
-  ============================================================ */
-  const products = [
-    { flavor:'Carne',  color:'var(--carne)',  href:'#producto-carne'  },
-    { flavor:'Atún',   color:'var(--atun)',   href:'#producto-atun'   },
-    { flavor:'Pollo',  color:'var(--pollo)',  href:'#producto-pollo'  },
-    { flavor:'Salmón', color:'var(--salmon)', href:'#producto-salmon' },
-    { flavor:'Pavo',   color:'var(--pavo)',   href:'#producto-pavo'   },
-  ];
+  <section class="home-access" aria-label="Accesos principales">
+    <div class="home-access-inner">
+      <h2 class="home-access-title">Seguí explorando</h2>
+      <p class="home-access-subtitle">Encontrá consejos para cuidar a tu gato o resolvé tus dudas frecuentes.</p>
 
-  /* ---- parámetros (ajustables) ---- */
-  const IDLE_SPEED = 0.0052;   // velocidad de giro automático (rad/frame)
-  const DRAG_SENS  = 0.0052;   // sensibilidad del arrastre (rad por px)
-  const FRICTION   = 0.95;     // decaimiento de inercia tras soltar (flick)
-  const EASE       = 0.085;    // suavizado hacia velocidad objetivo
-  const MIN_SCALE  = 0.6;      // tamaño de los sobres "al fondo"
-  const MAX_SCALE  = 1.0;      // tamaño "al frente"
-  const TWO_PI     = Math.PI * 2;
+      <div class="access-grid">
+        <a class="access-card" href="bienestar.html" data-spa-route="bienestar" aria-label="Ir a la página de Bienestar">
+          <div class="access-card-image" aria-hidden="true"></div>
+          <div class="access-card-content">
+            <h3 class="access-card-title">Bienestar felino</h3>
+            <span class="access-card-arrow" aria-hidden="true">→</span>
+          </div>
+        </a>
 
-  const stage  = document.getElementById('stage');
-  const system = document.getElementById('orbitSystem');
-  const ring   = document.getElementById('orbitRing');
-  const toast  = document.getElementById('toast');
+        <a class="access-card" href="preguntas.html" data-spa-route="preguntas" aria-label="Ir a la página de Preguntas">
+          <div class="access-card-image" aria-hidden="true"></div>
+          <div class="access-card-content">
+            <h3 class="access-card-title">Preguntas frecuentes</h3>
+            <span class="access-card-arrow" aria-hidden="true">→</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
 
-  /* ---- construir los sobres ---- */
-  const N = products.length;
-  const pouchEls = products.map((p, i) => {
-    const a = document.createElement('a');
-    a.className = 'pouch';
-    a.href = p.href;
-    a.dataset.flavor = p.flavor;
-    a.innerHTML = `
-      <span class="brand">whiskas</span>
-      <span class="age">1+</span>
-      <span class="tab" style="background:${p.color}">
-        <small>Sabor a</small><b>${p.flavor}</b>
-      </span>
-      <span class="grams">100g</span>
-      <span class="cta">Ver producto →</span>`;
-    system.appendChild(a);
 
-    /* hover: detener la órbita */
-    a.addEventListener('pointerenter', () => { hoverCount++; a.classList.add('active'); });
-    a.addEventListener('pointerleave', () => { hoverCount = Math.max(0, hoverCount-1); a.classList.remove('active'); });
 
-    /* clic: navegar al producto (en demo mostramos toast) */
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (dragMoved) return;            // si fue arrastre, no es clic
-      /* >>> PRODUCCIÓN: descomenta para navegar de verdad:
-         window.location.href = a.href;  */
-      showToast('→ Abriendo: Sabor a ' + a.dataset.flavor);
-    });
-    return a;
-  });
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <a class="footer-logo" href="#inicio" aria-label="Volver al inicio"><img src="assets/images/img_018_23b6d02a2f97.png" alt="Whiskas" /></a>
+        </div>
 
-  /* ---- estado de animación ---- */
-  let rotation = 0;
-  let velocity = IDLE_SPEED;
-  let hoverCount = 0;
-  let radiusX = 320, radiusY = 130;
+        <div class="footer-col">
+          <h3>Productos</h3>
+          <ul>
+            <li><a href="productos.html">Alimento seco</a></li>
+            <li><a href="productos.html">Alimento húmedo</a></li>
+            <li><a href="productos.html">Snacks y premios</a></li>
+          </ul>
+        </div>
 
-  /* ---- drag / inercia ---- */
-  let dragging = false, lastX = 0, dragMoved = false, downX = 0;
+        <div class="footer-col">
+          <h3>Conocenos</h3>
+          <ul>
+            <li><a href="nosotros.html">Sobre Whiskas</a></li>
+            <li><a href="bienestar.html">Bienestar felino</a></li>
+            <li><a href="nosotros.html">Sustentabilidad</a></li>
+          </ul>
+        </div>
 
-  stage.addEventListener('pointerdown', (e) => {
-    dragging = true; dragMoved = false;
-    lastX = downX = e.clientX;
-    stage.classList.add('dragging');
-  });
-  window.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - lastX;
-    lastX = e.clientX;
-    if (Math.abs(e.clientX - downX) > 6) dragMoved = true;
-    const delta = dx * DRAG_SENS;
-    rotation += delta;
-    velocity = delta;                  // guarda la velocidad para la inercia
-  });
-  window.addEventListener('pointerup', () => {
-    if (!dragging) return;
-    dragging = false;
-    stage.classList.remove('dragging');
-    setTimeout(() => { dragMoved = false; }, 30);
-  });
+        <div class="footer-col">
+          <h3>Ayuda</h3>
+          <ul>
+            <li><a href="preguntas.html" data-spa-route="preguntas">Preguntas frecuentes</a></li>
+            <li><a href="preguntas.html">Contacto</a></li>
+          </ul>
+        </div>
+      </div>
 
-  /* ---- dimensiones responsivas ---- */
-  function resize(){
-    const w = stage.clientWidth, h = stage.clientHeight;
-    radiusX = Math.max(150, Math.min(w * 0.33, 380));
-    radiusY = radiusX * 0.42;
-    ring.style.width  = (radiusX * 2) + 'px';
-    ring.style.height = (radiusY * 2) + 'px';
-  }
-  window.addEventListener('resize', resize);
+      <div class="footer-bottom">
+        <p>© 2025 Mars o afiliadas. Todos los derechos reservados.</p>
+        <a class="footer-chat" href="preguntas.html">chat ia</a>
+        <div class="footer-legal">
+          <a href="#">Privacidad</a>
+          <a href="#">Términos</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  /* ---- loop ---- */
-  function tick(){
-    if (!dragging){
-      const target = hoverCount > 0 ? 0 : IDLE_SPEED;
-      if (hoverCount === 0 && Math.abs(velocity) > IDLE_SPEED * 1.25){
-        velocity *= FRICTION;          // inercia: decae solo hasta el idle
-      } else {
-        velocity += (target - velocity) * EASE;   // suaviza a parar o a girar
-      }
-      rotation += velocity;
-    }
 
-    for (let i = 0; i < N; i++){
-      const el = pouchEls[i];
-      const angle = rotation + (i * TWO_PI / N);
-      const x = Math.cos(angle) * radiusX;
-      const y = Math.sin(angle) * radiusY;
-      const depth = (Math.sin(angle) + 1) / 2;     // 0 = arriba/atrás, 1 = abajo/frente
-      const scale = MIN_SCALE + depth * (MAX_SCALE - MIN_SCALE);
-      el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale.toFixed(3)})`;
-      el.style.opacity = (0.5 + depth * 0.5).toFixed(2);
-      el.style.zIndex = el.classList.contains('active') ? 200 : Math.round(depth * 100);
-    }
-    requestAnimationFrame(tick);
-  }
+  </div>
 
-  /* ---- croquetas flotando ---- */
-  function spawnKibble(n){
-    for (let i = 0; i < n; i++){
-      const k = document.createElement('div');
-      k.className = 'kibble';
-      k.style.left = (10 + Math.random() * 80) + '%';
-      k.style.top  = (15 + Math.random() * 65) + '%';
-      k.style.animationDuration = (3 + Math.random() * 3) + 's';
-      k.style.animationDelay = (Math.random() * 3) + 's';
-      stage.appendChild(k);
-    }
-  }
+<div class="toast" id="toast"></div>
 
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toast.classList.remove('show'), 1600);
-  }
-
-  resize();
-  spawnKibble(7);
-  requestAnimationFrame(tick);
-</script>
+<script src="js/main.js"></script>
 </body>
 </html>
